@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="AI-powered audio splitter that automatically segments songs by lyric lines">
+  <title>AI Audio Lyric Splitter - Split Songs by Lyrics</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+  <div class="container">
+    <!-- Header -->
+    <header>
+      <h1>🎵 AI Audio Lyric Splitter</h1>
+      <p class="subtitle">Automatically split your songs into segments by lyric lines</p>
+    </header>
+
+    <!-- Step 1: Upload Audio -->
+    <div class="glass-card">
+      <h2 class="section-title">
+        <span class="section-icon">📁</span>
+        Step 1: Upload Audio File
+      </h2>
+
+      <div class="upload-area" id="uploadArea">
+        <div class="upload-icon">🎵</div>
+        <p class="upload-text">Click to upload or drag & drop your audio file</p>
+        <p class="upload-hint">Supports MP3, WAV, M4A, OGG (Max 100MB)</p>
+        <input type="file" id="audioFile" accept="audio/*">
+      </div>
+
+      <div class="audio-info" id="audioInfo">
+        <div class="audio-icon">🎧</div>
+        <div class="audio-details">
+          <h3 id="fileName">Song.mp3</h3>
+          <p id="fileSize">0 MB • <span id="fileDuration">0:00</span></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 2: Input Lyrics -->
+    <div class="glass-card lyrics-section" id="lyricsSection">
+      <h2 class="section-title">
+        <span class="section-icon">📝</span>
+        Step 2: Input Lyrics (Optional - AI will auto-detect)
+      </h2>
+
+      <div class="api-key-section"
+        style="margin-bottom: var(--spacing-md); padding: var(--spacing-sm); background: rgba(0,0,0,0.2); border-radius: 8px;">
+        <label style="display: block; font-size: 0.9rem; margin-bottom: 5px; color: var(--text-secondary);">
+          🔑 AI API Key (Groq):
+          <span style="font-size: 0.8rem; opacity: 0.7;">(Required for precise timing)</span>
+        </label>
+        <input type="password" id="apiKeyInput" value=""
+          placeholder="gsk_..."
+          style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid var(--card-border); background: rgba(0,0,0,0.3); color: white; margin-bottom: 10px;">
+
+        <label style="display: block; font-size: 0.9rem; margin-bottom: 5px; color: var(--text-secondary);">
+          🌍 Language:
+        </label>
+        <select id="languageSelect"
+          style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid var(--card-border); background: rgba(0,0,0,0.3); color: white;">
+          <option value="auto">Auto-detect</option>
+          <option value="en">English</option>
+          <option value="es">Spanish</option>
+          <option value="fr">French</option>
+          <option value="de">German</option>
+          <option value="it">Italian</option>
+          <option value="pt">Portuguese</option>
+          <option value="ru">Russian</option>
+          <option value="ja">Japanese</option>
+          <option value="ko">Korean</option>
+          <option value="zh">Chinese</option>
+          <option value="hi">Hindi</option>
+          <option value="ar">Arabic</option>
+          <option value="tr">Turkish</option>
+          <option value="nl">Dutch</option>
+          <option value="pl">Polish</option>
+        </select>
+      </div>
+
+      <textarea id="lyricsInput" placeholder="Paste your lyrics here... (one line per segment)
+
+Example:
+First line of the song
+Second line of the song
+Third line of the song
+...and so on"></textarea>
+
+      <div class="btn-group">
+        <button class="btn btn-primary" id="analyzeLyrics">
+          <span>🔍</span>
+          <span>Analyze & Detect Timing</span>
+        </button>
+        <button class="btn btn-secondary" id="clearLyrics">
+          <span>🗑️</span>
+          <span>Clear</span>
+        </button>
+      </div>
+
+      <div class="progress-container" id="analysisProgress">
+        <div class="progress-label">
+          <span id="analysisStatus">Analyzing audio...</span>
+          <span id="analysisPercent">0%</span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill" id="analysisProgressFill" style="width: 0%"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 3: Preview & Adjust Segments -->
+    <div class="glass-card segments-section" id="segmentsSection">
+      <h2 class="section-title">
+        <span class="section-icon">✂️</span>
+        Step 3: Preview & Download Segments
+      </h2>
+
+      <div class="segments-grid" id="segmentsGrid">
+        <!-- Segments will be dynamically added here -->
+      </div>
+
+      <div class="download-all">
+        <h3>Ready to download all segments?</h3>
+        <button class="btn btn-primary" id="downloadAll">
+          <span>📦</span>
+          <span>Download All as ZIP</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Processing Progress -->
+    <div class="glass-card" id="processingCard" style="display: none;">
+      <h2 class="section-title">
+        <span class="section-icon">⚙️</span>
+        Processing Audio
+      </h2>
+
+      <div class="progress-container active">
+        <div class="progress-label">
+          <span id="processingStatus">Initializing...</span>
+          <span id="processingPercent">0%</span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill" id="processingProgressFill" style="width: 0%"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- JSZip for ZIP creation -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
+  <!-- Application Scripts -->
+  <script src="lyrics-analyzer.js"></script>
+  <script src="audio-processor.js"></script>
+  <script src="groq-service.js"></script>
+  <script src="app.js"></script>
+</body>
+
+</html>
